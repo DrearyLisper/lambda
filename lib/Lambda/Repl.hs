@@ -2,14 +2,23 @@ module Lambda.Repl where
 
 import Data.List
 import Control.Monad.Trans
+import Control.Monad
 import Lambda.Parsing
+import Lambda.Evaluation
 import System.Console.Repline
 
 type Repl a = HaskelineT IO a
 
 -- Evaluation : handle each line user inputs
 cmd :: String -> Repl ()
-cmd input = liftIO $ print $ parseExpression input
+cmd input = liftIO $ forM_ output putStrLn
+  where
+    expression = fst $ parseExpression input
+    evals = iterate eval expression
+    output = zipWith (\a b -> a ++": " ++b)
+                     (map show [0..])
+                     (map show (take 5 evals))
+
 
 completer :: Monad m => WordCompleter m
 completer n = do
