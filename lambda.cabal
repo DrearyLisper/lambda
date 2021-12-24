@@ -1,0 +1,18 @@
+cabal-version:      2.4
+name:               lambda
+version:            0.1.0.0
+
+author:             Dreary Lisper
+maintainer:         drearylisper@gmail.com
+
+executable lambda
+    main-is:          Main.hs
+    build-depends:    lambda, repline, base ^>=4.14.3.0
+    hs-source-dirs:   src
+    default-language: Haskell2010
+
+library
+    exposed-modules:  Lambda.Parsing, Lambda.Evaluation, Lambda.Types
+    build-depends:    base ^>=4.14.3.0
+    hs-source-dirs:   lib
+    default-language: Haskell2010
