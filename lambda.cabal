@@ -13,6 +13,6 @@ executable lambda
 
 library
     exposed-modules:  Lambda.Parsing, Lambda.Evaluation, Lambda.Types, Lambda.Repl
-    build-depends:    repline >= 0.4.0.0, haskeline >= 0.8.1.3, mtl, base ^>=4.14.3.0
+    build-depends:    containers, repline >= 0.4.0.0, haskeline >= 0.8.1.3, mtl, base ^>=4.14.3.0
     hs-source-dirs:   lib
     default-language: Haskell2010
