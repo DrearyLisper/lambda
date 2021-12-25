@@ -1,6 +1,9 @@
 module Lambda.Types where
 
-data Expression = Name String | Function Expression Expression | Application Expression Expression deriving Show
+data Expression = Name String
+                | Function Expression Expression
+                | Application Expression Expression
+                deriving (Show, Eq)
 
 isName :: Expression -> Bool
 isName (Name _) = True
