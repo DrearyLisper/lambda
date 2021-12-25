@@ -20,5 +20,5 @@ substitute _ _ = error "Can't substitute into non-function expression"
 eval :: Expression -> Expression
 eval (Name name) = Name name
 eval (Function argument body) = Function argument body
-eval (Application func arg) | isFunction $ eval func = substitute (eval func) (eval arg)
+eval (Application func arg) | isFunction $ eval func = substitute (eval func) arg
                             | otherwise = Application (eval func) (eval arg)
