@@ -38,3 +38,16 @@ parseExpression [] = error "Empty string"
 parseExpression (x:xs) | x == '\\' = parseFunction xs
                        | x == '('  = parseApplication xs
                        | otherwise = parseName (x:xs)
+
+
+formatExpression :: Expression -> String
+formatExpression (Name name) = name
+formatExpression (Application func arg) = "(" ++
+                                          formatExpression func ++
+                                          " " ++
+                                          formatExpression arg ++
+                                          ")"
+formatExpression (Function arg body) = "\\" ++
+                                       formatExpression arg ++
+                                       "." ++
+                                       formatExpression body
