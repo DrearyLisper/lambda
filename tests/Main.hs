@@ -36,7 +36,8 @@ testForms = [
   ("(\\zero.(\\succ.zero \\n.\\f.\\x.(f ((n f) x))) \\f.\\x.x)", "\\f.\\x.x"),
   ("(\\zero.(\\succ.(succ zero) \\n.\\f.\\x.(f ((n f) x))) \\f.\\x.x)", "\\f.\\x.(f x)"),
   ("(\\zero.(\\succ.(succ (succ zero)) \\n.\\f.\\x.(f ((n f) x))) \\f.\\x.x)", "\\f.\\x.(f (f x))"),
-  ("(\\zero.(\\succ.(succ (succ (succ zero))) \\n.\\f.\\x.(f ((n f) x))) \\f.\\x.x)", "\\f.\\x.(f (f (f x)))")
+  ("(\\zero.(\\succ.(succ (succ (succ zero))) \\n.\\f.\\x.(f ((n f) x))) \\f.\\x.x)", "\\f.\\x.(f (f (f x)))"),
+  ("(\\h.\\f.(h f) f)", "\\r-f.(f r-f)")
   ]
 
 main :: IO ()

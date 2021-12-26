@@ -2,18 +2,6 @@ module Lambda.Parsing where
 
 import Lambda.Types
 
-isName :: Expression -> Bool
-isName (Name _) = True
-isName _ = False
-
-isFunction :: Expression -> Bool
-isFunction (Function _ _) = True
-isFunction _ = False
-
-isApplication :: Expression -> Bool
-isApplication (Application _ _) = True
-isApplication _ = False
-
 parseName :: String -> (Expression, String)
 parseName xs = parseName' xs []
   where
