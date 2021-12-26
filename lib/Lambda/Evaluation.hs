@@ -46,7 +46,7 @@ step ((Name name), _) = (Name name, False)
 step ((Function argument body), _) = let (newBody, updated) = step (body, False)
                                      in (Function argument newBody, updated)
 step ((Application function argument), _)
-  | isFunction $ eval function = let (newFunction, _) = step (function, False)
+  | isFunction $ eval function = let newFunction = eval function
                                  in (beta newFunction argument, True)
   | otherwise = let (newFunction, updatedFunction) = step (function, False)
                     (newArgument, updatedArgument) = step (argument, False)
