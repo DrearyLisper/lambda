@@ -11,14 +11,9 @@ type Repl a = HaskelineT IO a
 
 -- Evaluation : handle each line user inputs
 cmd :: String -> Repl ()
-cmd input = liftIO $ forM_ output putStrLn
+cmd input = liftIO $ putStrLn $ formatExpression $ eval $ expression
   where
     expression = fst $ parseExpression input
-    evals = iterate eval expression
-    output = zipWith (\a b -> a ++": " ++b)
-                     (map show [0..])
-                     (map show (take 5 evals))
-
 
 completer :: Monad m => WordCompleter m
 completer n = do

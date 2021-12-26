@@ -41,8 +41,18 @@ free expression = free' expression Set.empty
     free' (Function argument body) bound = error "Function argument can be Name String only"
     free' (Application function argument) bound = free' function bound `Set.union` free' argument bound
 
+step :: (Expression, Bool) -> (Expression, Bool)
+step ((Name name), _) = (Name name, False)
+step ((Function argument body), _) = let
+                                  (newBody, updated) = step (body, False)
+                                  in (Function argument newBody, updated)
+step ((Application function argument), _) | isFunction $ eval function = let
+                                                                        (newFunction, _) = step (function, False)
+                                                                      in (beta newFunction argument, True)
+                                       | otherwise = let
+                                                       (newFunction, updatedFunction) = step (function, False)
+                                                       (newArgument, updatedArgument) = step (argument, False)
+                                                     in (Application newFunction newArgument, updatedFunction || updatedArgument)
+
 eval :: Expression -> Expression
-eval (Name name) = Name name
-eval (Function argument body) = Function argument (eval body)
-eval (Application function argument) | isFunction $ eval function = beta (eval function) argument
-                                     | otherwise = Application (eval function) (eval argument)
+eval expression = fst $ head $ dropWhile snd $ iterate step (expression, True)
