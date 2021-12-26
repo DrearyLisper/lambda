@@ -43,16 +43,14 @@ free expression = free' expression Set.empty
 
 step :: (Expression, Bool) -> (Expression, Bool)
 step ((Name name), _) = (Name name, False)
-step ((Function argument body), _) = let
-                                  (newBody, updated) = step (body, False)
-                                  in (Function argument newBody, updated)
-step ((Application function argument), _) | isFunction $ eval function = let
-                                                                        (newFunction, _) = step (function, False)
-                                                                      in (beta newFunction argument, True)
-                                       | otherwise = let
-                                                       (newFunction, updatedFunction) = step (function, False)
-                                                       (newArgument, updatedArgument) = step (argument, False)
-                                                     in (Application newFunction newArgument, updatedFunction || updatedArgument)
+step ((Function argument body), _) = let (newBody, updated) = step (body, False)
+                                     in (Function argument newBody, updated)
+step ((Application function argument), _)
+  | isFunction $ eval function = let (newFunction, _) = step (function, False)
+                                 in (beta newFunction argument, True)
+  | otherwise = let (newFunction, updatedFunction) = step (function, False)
+                    (newArgument, updatedArgument) = step (argument, False)
+                in (Application newFunction newArgument, updatedFunction || updatedArgument)
 
 eval :: Expression -> Expression
 eval expression = fst $ head $ dropWhile snd $ iterate step (expression, True)
