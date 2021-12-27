@@ -3,6 +3,7 @@ module Main where
 import Test.Hspec
 
 import Control.Monad
+import qualified Data.Map as Map
 
 import Lambda.Parsing
 import Lambda.Types
@@ -62,4 +63,4 @@ main = hspec $ do
 
   describe "Lambda.Evaluation.eval" $ do
     it "can eval" $ do
-      forM_ testForms $ \(a, b) -> b `shouldBe` (formatExpression $ eval $ fst $ parseExpression a)
+      forM_ testForms $ \(a, b) -> b `shouldBe` (formatExpression $ eval Map.empty $ fst $ parseExpression a)

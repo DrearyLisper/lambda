@@ -3,9 +3,12 @@ module Lambda.Evaluation where
 
 import Lambda.Types
 
+import Debug.Trace
+
 import qualified Data.Set as Set
 import qualified Data.Map as Map
 import Data.Maybe (fromMaybe, isJust)
+import Lambda.Parsing (formatExpression)
 
 
 data BetaContext = BetaContext {argumentName :: String, argumentValue :: Expression, replacementName :: Map.Map String String}
@@ -41,23 +44,25 @@ free expression = free' expression Set.empty
     free' (Function argument body) bound = error "Function argument can be Name String only"
     free' (Application function argument) bound = free' function bound `Set.union` free' argument bound
 
-step :: (Expression, Bool) -> (Expression, Bool)
-step (Name name, _) = (Name name, False)
-step (Function argument body, _) = let (newBody, updated) = step (body, False)
-                                   in (Function argument newBody, updated)
-step (Application function argument, _)
+step :: Map.Map String Expression -> (Expression, Bool) -> (Expression, Bool)
+step db (Name name, _) = case name `Map.lookup` db of
+                           Nothing -> (Name name, False)
+                           Just replacement -> (replacement, True)
+
+step db (Function argument body, _) = let (newBody, updated) = step db (body, False)
+                                      in (Function argument newBody, updated)
+
+step db (Application function argument, _)
   | isFunction function = let newFunction = function
                           in (beta newFunction argument, True)
-  | otherwise = let (newFunction, updatedFunction) = step (function, False)
-                    (newArgument, updatedArgument) = step (argument, False)
+  | otherwise = let (newFunction, updatedFunction) = step db (function, False)
+                    (newArgument, updatedArgument) = step db (argument, False)
                 in case (updatedFunction, updatedArgument) of
                      (False, False) -> (Application function argument, False)
                      (True, _) -> (Application newFunction argument, True)
                      (False, True) -> (Application function newArgument, True)
 
+t x = trace (formatExpression $ fst x) x
 
-evalOnce :: Expression -> Expression
-evalOnce expression = fst $ step (expression, True)
-
-eval :: Expression -> Expression
-eval expression = fst $ head $ dropWhile snd $ iterate step (expression, True)
+eval :: Map.Map String Expression -> Expression -> Expression
+eval db expression = fst $ head $ dropWhile snd $ iterate (step db) (expression, True)

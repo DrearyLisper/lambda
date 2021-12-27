@@ -6,12 +6,13 @@ import Control.Monad
 import Lambda.Parsing
 import Lambda.Evaluation
 import System.Console.Repline
+import qualified Data.Map as Map
 
 type Repl a = HaskelineT IO a
 
 -- Evaluation : handle each line user inputs
 cmd :: String -> Repl ()
-cmd input = liftIO $ putStrLn $ formatExpression $ eval $ expression
+cmd input = liftIO $ putStrLn $ formatExpression $ eval Map.empty expression
   where
     expression = fst $ parseExpression input
 
