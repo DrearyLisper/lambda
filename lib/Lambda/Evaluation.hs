@@ -53,8 +53,7 @@ step db (Function argument body, _) = let (newBody, updated) = step db (body, Fa
                                       in (Function argument newBody, updated)
 
 step db (Application function argument, _)
-  | isFunction function = let newFunction = function
-                          in (beta newFunction argument, True)
+  | isFunction function = (beta function argument, True)
   | otherwise = let (newFunction, updatedFunction) = step db (function, False)
                     (newArgument, updatedArgument) = step db (argument, False)
                 in case (updatedFunction, updatedArgument) of
@@ -62,7 +61,7 @@ step db (Application function argument, _)
                      (True, _) -> (Application newFunction argument, True)
                      (False, True) -> (Application function newArgument, True)
 
-t x = trace (formatExpression $ fst x) x
+t x = x -- trace (show $ length $ formatExpression $ fst x) x
 
 eval :: Map.Map String Expression -> Expression -> Expression
-eval db expression = fst $ head $ dropWhile snd $ iterate (step db) (expression, True)
+eval db expression = fst $ head $ dropWhile snd $ iterate ((step db).t) (expression, True)
