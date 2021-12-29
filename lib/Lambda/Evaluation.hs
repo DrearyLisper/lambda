@@ -2,12 +2,16 @@
 module Lambda.Evaluation where
 
 import Lambda.Types
+import Lambda.Coding ( number )
 
 import Debug.Trace
 
+import Data.List
+import Text.Read (readMaybe)
+
 import qualified Data.Set as Set
 import qualified Data.Map as Map
-import Data.Maybe (fromMaybe, isJust)
+import Data.Maybe (fromMaybe, isJust, isNothing)
 import Lambda.Parsing (formatExpression)
 
 
@@ -44,24 +48,34 @@ free expression = free' expression Set.empty
     free' (Function argument body) bound = error "Function argument can be Name String only"
     free' (Application function argument) bound = free' function bound `Set.union` free' argument bound
 
-step :: Map.Map String Expression -> (Expression, Bool) -> (Expression, Bool)
-step db (Name name, _) = case name `Map.lookup` db of
-                           Nothing -> (Name name, False)
-                           Just replacement -> (replacement, True)
+type StepDB = Map.Map String Expression
 
-step db (Function argument body, _) = let (newBody, updated) = step db (body, False)
-                                      in (Function argument newBody, updated)
+step :: (Expression, Bool, StepDB) -> (Expression, Bool, StepDB)
+step (Name name, _, db)
+  | isJust (readMaybe name :: Maybe Int) = (number (read name :: Int), True, db)
+  | otherwise = case formatExpression (Name name) `Map.lookup` db of
+                  Nothing -> (Name name, False, db)
+                  Just replacement -> if "'" `Map.member` db
+                                         then (Name name, False, db)
+                                         else (replacement, True, db)
 
-step db (Application function argument, _)
-  | isFunction function = (beta function argument, True)
-  | otherwise = let (newFunction, updatedFunction) = step db (function, False)
-                    (newArgument, updatedArgument) = step db (argument, False)
+
+step (Function argument body, _, db) = let (newBody, updated, db') = step (body, False, db)
+                                       in (Function argument newBody, updated, db')
+
+step (Application function argument, _, db)
+  | isFunction function = let (newArgument, updatedArgument, db') = step (argument, False, Map.insert "'" function db)
+                              betaResult = beta function argument
+                          in (betaResult, True, db)
+
+  | otherwise = let (newFunction, updatedFunction, newDB) = step (function, False, db)
+                    (newArgument, updatedArgument, newDB') = step (argument, False, db)
                 in case (updatedFunction, updatedArgument) of
-                     (False, False) -> (Application function argument, False)
-                     (True, _) -> (Application newFunction argument, True)
-                     (False, True) -> (Application function newArgument, True)
+                     (False, False) -> (Application function argument, False, db)
+                     (True, _) -> (Application newFunction argument, True, newDB)
+                     (False, True) -> (Application function newArgument, True, newDB')
 
-t x = x -- trace (show $ length $ formatExpression $ fst x) x
+t (a,b,c) = (a,b,c) -- trace (formatExpression a) (a,b,c)
 
-eval :: Map.Map String Expression -> Expression -> Expression
-eval db expression = fst $ head $ dropWhile snd $ iterate ((step db).t) (expression, True)
+eval :: (StepDB, Expression) -> (StepDB, Expression)
+eval (db, expression) = (\(a,b,c)->(c,a)) $ head $ dropWhile (\(a,b,c)->b) $ iterate (step.t) (expression, True, db)

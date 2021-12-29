@@ -12,7 +12,7 @@ type Repl a = HaskelineT IO a
 
 -- Evaluation : handle each line user inputs
 cmd :: String -> Repl ()
-cmd input = liftIO $ putStrLn $ formatExpression $ eval Map.empty expression
+cmd input = liftIO $ putStrLn $ formatExpression $ snd $ eval (Map.empty, expression)
   where
     expression = fst $ parseExpression input
 
