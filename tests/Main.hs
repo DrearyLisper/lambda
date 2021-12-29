@@ -45,22 +45,24 @@ main :: IO ()
 main = hspec $ do
   describe "Lambda.Parsing.parseExpression" $ do
     it "can parse names" $ do
-      parseExpression "x" `shouldBe` (Name "x", "")
-      parseExpression "1" `shouldBe` (Name "1", "")
+      parseExpression "x" `shouldBe` (Name "x" Nothing, "")
+      parseExpression "1" `shouldBe` (Name "1" Nothing, "")
     it "can parse applications" $ do
-      parseExpression "(x x)" `shouldBe` ((Application (Name "x") (Name "x")), "")
+      parseExpression "(x x)" `shouldBe` (Application (Name "x" Nothing) (Name "x" Nothing) Nothing, "")
       parseExpression "(\\x.x x)" `shouldBe` ((Application
                                               (Function
-                                               (Name "x")
-                                               (Name "x"))
-                                              (Name "x")), "")
+                                               (Name "x" Nothing)
+                                               (Name "x" Nothing)
+                                               Nothing)
+                                              (Name "x" Nothing)
+                                              Nothing), "")
     it "can parse functions" $ do
-      parseExpression "\\x.x" `shouldBe` ((Function (Name "x") (Name "x")), "")
+      parseExpression "\\x.x" `shouldBe` (Function (Name "x" Nothing) (Name "x" Nothing) Nothing, "")
 
   describe "Lambda.Parsing.formatExpression" $ do
     it "can parse and format" $ do
-      forM_ (map fst testForms) $ \x -> x `shouldBe` (formatExpression $ fst $ parseExpression x)
+      forM_ (map fst testForms) $ \x -> x `shouldBe` formatExpression (fst $ parseExpression x)
 
   describe "Lambda.Evaluation.eval" $ do
     it "can eval" $ do
-      forM_ testForms $ \(a, b) -> b `shouldBe` (formatExpression $ snd $ eval (Map.empty,  fst $ parseExpression a))
+      forM_ testForms $ \(a, b) -> b `shouldBe` formatExpression (snd $ eval (Map.empty,  fst $ parseExpression a))
