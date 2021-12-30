@@ -60,17 +60,14 @@ step (Name name uid, _, db)
   | isJust (readMaybe name :: Maybe Int) = (number (read name :: Int), True, db)
   | otherwise = case name `Map.lookup` db of
                   Nothing -> (Name name uid, False, db)
-                  Just replacement -> if "'" `Map.member` db
-                                         then (Name name uid, False, db)
-                                         else (replacement, True, db)
+                  Just replacement -> (replacement, True, db)
 
 
 step (Function argument body uid, _, db) = let (newBody, updated, db') = step (body, False, db)
                                            in (Function argument newBody uid, updated, db')
 
 step (Application function argument uid, _, db)
-  | isFunction function = let (newArgument, updatedArgument, db') = step (argument, False, Map.insert "'" function db)
-                              betaResult = beta function argument
+  | isFunction function = let betaResult = beta function argument
                           in (betaResult, True, db)
 
   | otherwise = let (newFunction, updatedFunction, newDB) = step (function, False, db)
