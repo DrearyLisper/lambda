@@ -10,7 +10,7 @@ import Data.List
 import Text.Read (readMaybe)
 
 import qualified Data.Set as Set
-import qualified Data.Map as Map
+import qualified Data.Map.Strict as Map
 import Data.Maybe (fromMaybe, isJust, isNothing)
 import Lambda.Parsing (formatExpression)
 
@@ -53,22 +53,30 @@ free expression = free' expression Set.empty
     free' (Function argument body _) bound = error "Function argument can be Name String only"
     free' (Application function argument _) bound = free' function bound `Set.union` free' argument bound
 
-type StepDB = Map.Map String Expression
+retrieveFunction :: StepDB -> Expression -> Expression
+retrieveFunction _ (Function argument body uid) = Function argument body uid
+retrieveFunction _ (Application function argument uid) = Application function argument uid
+retrieveFunction db (Name name uid) = case name `Map.lookup` db of
+                                        Nothing -> Name name uid
+                                        Just replacement -> replacement
+
 
 step :: (Expression, Bool, StepDB) -> (Expression, Bool, StepDB)
 step (Name name uid, _, db)
   | isJust (readMaybe name :: Maybe Int) = (number (read name :: Int), True, db)
   | otherwise = case name `Map.lookup` db of
                   Nothing -> (Name name uid, False, db)
-                  Just replacement -> (replacement, True, db)
-
+                  Just replacement -> let (replacement', updated, db') = step (replacement, False, db)
+                                      in if updated
+                                            then (Name name uid, True, Map.insert name replacement' db')
+                                            else (replacement', True, db')
 
 step (Function argument body uid, _, db) = let (newBody, updated, db') = step (body, False, db)
                                            in (Function argument newBody uid, updated, db')
 
 step (Application function argument uid, _, db)
-  | isFunction function = let betaResult = beta function argument
-                          in (betaResult, True, db)
+  | isFunction (retrieveFunction db function) = let betaResult = beta (retrieveFunction db function) argument
+                                                in (betaResult, True, db)
 
   | otherwise = let (newFunction, updatedFunction, newDB) = step (function, False, db)
                     (newArgument, updatedArgument, newDB') = step (argument, False, db)
@@ -77,7 +85,7 @@ step (Application function argument uid, _, db)
                      (True, _) -> (Application newFunction argument uid, True, newDB)
                      (False, True) -> (Application function newArgument uid, True, newDB')
 
-t (a,b,c) = (a,b,c) --trace (formatExpression a) (a,b,c)
+t (a,b,c) = (a,b,c) -- trace (formatExpression a) (a,b,c)
 
 eval :: (StepDB, Expression) -> (StepDB, Expression)
 eval (db, expression) = (\(a,b,c)->(c,a)) $ head $ dropWhile (\(a,b,c)->b) $ iterate (step.t) (expression, True, db)

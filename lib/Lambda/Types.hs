@@ -1,5 +1,9 @@
 module Lambda.Types where
 
+import qualified Data.Map.Strict as Map
+
+type StepDB = Map.Map String Expression
+
 data Expression = Name String (Maybe Int)
                 | Function Expression Expression (Maybe Int)
                 | Application Expression Expression (Maybe Int)
