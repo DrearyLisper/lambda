@@ -4,9 +4,9 @@ import qualified Data.Map.Strict as Map
 
 type StepDB = Map.Map String Expression
 
-data Expression = Name String (Maybe Int)
-                | Function Expression Expression (Maybe Int)
-                | Application Expression Expression (Maybe Int)
+data Expression = Name String
+                | Function Expression Expression
+                | Application Expression Expression
                 deriving (Show, Eq, Ord)
 
 isName :: Expression -> Bool

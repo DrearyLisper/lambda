@@ -45,19 +45,17 @@ main :: IO ()
 main = hspec $ do
   describe "Lambda.Parsing.parseExpression" $ do
     it "can parse names" $ do
-      parseExpression "x" `shouldBe` (Name "x" Nothing, "")
-      parseExpression "1" `shouldBe` (Name "1" Nothing, "")
+      parseExpression "x" `shouldBe` (Name "x", "")
+      parseExpression "1" `shouldBe` (Name "1", "")
     it "can parse applications" $ do
-      parseExpression "(x x)" `shouldBe` (Application (Name "x" Nothing) (Name "x" Nothing) Nothing, "")
+      parseExpression "(x x)" `shouldBe` (Application (Name "x") (Name "x"), "")
       parseExpression "(\\x.x x)" `shouldBe` ((Application
                                               (Function
-                                               (Name "x" Nothing)
-                                               (Name "x" Nothing)
-                                               Nothing)
-                                              (Name "x" Nothing)
-                                              Nothing), "")
+                                               (Name "x")
+                                               (Name "x"))
+                                              (Name "x")), "")
     it "can parse functions" $ do
-      parseExpression "\\x.x" `shouldBe` (Function (Name "x" Nothing) (Name "x" Nothing) Nothing, "")
+      parseExpression "\\x.x" `shouldBe` (Function (Name "x") (Name "x"), "")
 
   describe "Lambda.Parsing.formatExpression" $ do
     it "can parse and format" $ do
