@@ -8,14 +8,14 @@ maintainer:         drearylisper@gmail.com
 executable lambda
     ghc-options:      -O3
     main-is:          Main.hs
-    build-depends:    lambda, base ^>=4.14.3.0
+    build-depends:    lambda, base
     hs-source-dirs:   src
     default-language: Haskell2010
 
 library
     ghc-options:      -O3
     exposed-modules:  Lambda.Parsing, Lambda.Evaluation, Lambda.Types, Lambda.Repl, Lambda.Coding
-    build-depends:    containers, repline >= 0.4.0.0, haskeline >= 0.8.1.3, mtl, base ^>=4.14.3.0
+    build-depends:    containers, repline >= 0.4.0.0, haskeline >= 0.8.1.3, mtl, base
     hs-source-dirs:   lib
     default-language: Haskell2010
 
@@ -23,6 +23,6 @@ test-suite test-lambda
     ghc-options:      -O3
     type:             exitcode-stdio-1.0
     main-is:          Main.hs
-    build-depends:    containers, lambda, hspec, base ^>=4.14.3.0
+    build-depends:    containers, lambda, hspec, base
     hs-source-dirs:   tests
     default-language: Haskell2010
