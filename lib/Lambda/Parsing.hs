@@ -1,3 +1,4 @@
+{-# LANGUAGE BangPatterns #-}
 module Lambda.Parsing where
 
 import Lambda.Types
@@ -12,14 +13,14 @@ parseName xs = parseName' xs []
 parseFunction :: String -> (Expression, String)
 parseFunction xs = (Function argumentName functionBody, rest')
   where
-    (argumentName, rest) = parseName xs
-    (functionBody, rest') = parseExpression $ tail rest
+    (!argumentName, rest) = parseName xs
+    (!functionBody, rest') = parseExpression $ tail rest
 
 parseApplication :: String -> (Expression, String)
 parseApplication xs = (Application functionExpression argumentExpression, tail rest')
   where
-    (functionExpression, rest) = parseExpression xs
-    (argumentExpression, rest') = parseExpression $ tail rest
+    (!functionExpression, rest) = parseExpression xs
+    (!argumentExpression, rest') = parseExpression $ tail rest
 
 parseExpression :: String -> (Expression, String)
 parseExpression [] = error "Empty string"
